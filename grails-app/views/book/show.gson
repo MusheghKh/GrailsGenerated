@@ -1,0 +1,7 @@
+import grailsgenerated.Book
+
+model {
+	Book book
+}
+
+json tmpl.book(book)

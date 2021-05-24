@@ -1,0 +1,7 @@
+import grailsgenerated.Author
+
+model {
+	Author author
+}
+
+json tmpl.author(author)
