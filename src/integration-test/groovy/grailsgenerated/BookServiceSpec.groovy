@@ -13,20 +13,30 @@ class BookServiceSpec extends Specification {
     BookService bookService
     @Autowired Datastore datastore
 
-    private Long setupData() {
-        // TODO: Populate valid domain instances and return a valid ID
-        //new Book(...).save(flush: true, failOnError: true)
-        //new Book(...).save(flush: true, failOnError: true)
-        //Book book = new Book(...).save(flush: true, failOnError: true)
-        //new Book(...).save(flush: true, failOnError: true)
-        //new Book(...).save(flush: true, failOnError: true)
-        assert false, "TODO: Provide a setupData() implementation for this generated test suite"
-        //book.id
+    private static Long setupData() {
+        List<Author> authors = []
+        (1..5).each {
+            authors.add(new Author(name: "name$it"))
+        }
+
+        addAuthors(authors, new Book(name: "name1").save(flush: true, failOnError: true))
+        addAuthors(authors, new Book(name: "name2").save(flush: true, failOnError: true))
+        Book book = new Book(name: "name3").save(flush: true, failOnError: true)
+        addAuthors(authors, book)
+        addAuthors(authors, new Book(name: "name4").save(flush: true, failOnError: true))
+        addAuthors(authors, new Book(name: "name5").save(flush: true, failOnError: true))
+        book.id
     }
 
-    void cleanup() {
-        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
+    private static addAuthors(List<Author> authors, Book book) {
+        authors.each {
+            book.addToAuthors(it)
+        }
     }
+
+//    void cleanup() {
+//        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
+//    }
 
     void "test get"() {
         setupData()
@@ -43,7 +53,8 @@ class BookServiceSpec extends Specification {
 
         then:
         bookList.size() == 2
-        assert false, "TODO: Verify the correct instances are returned"
+        bookList[0].name == 'name3'
+        bookList[1].name == 'name4'
     }
 
     void "test count"() {
@@ -54,7 +65,10 @@ class BookServiceSpec extends Specification {
     }
 
     void "test delete"() {
+        given:
         Long bookId = setupData()
+        Book book = bookService.get(bookId)
+        book.authors = null
 
         expect:
         bookService.count() == 5
@@ -69,8 +83,7 @@ class BookServiceSpec extends Specification {
 
     void "test save"() {
         when:
-        assert false, "TODO: Provide a valid instance to save"
-        Book book = new Book()
+        Book book = new Book(name: 'some valid name')
         bookService.save(book)
 
         then:

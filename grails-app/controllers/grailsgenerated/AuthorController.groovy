@@ -1,6 +1,8 @@
 package grailsgenerated
 
 import grails.validation.ValidationException
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST
 import static org.springframework.http.HttpStatus.CREATED
 import static org.springframework.http.HttpStatus.NOT_FOUND
 import static org.springframework.http.HttpStatus.NO_CONTENT
@@ -14,6 +16,7 @@ import grails.gorm.transactions.Transactional
 class AuthorController {
 
     AuthorService authorService
+    BookService bookService
 
     static responseFormats = ['json', 'xml']
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -38,6 +41,17 @@ class AuthorController {
             respond author.errors
             return
         }
+        def bookId = params.bookId
+        if (!bookId) {
+            render status: BAD_REQUEST
+            return
+        }
+        Book book = bookService.get(bookId)
+        if (!book) {
+            render status: NOT_FOUND
+            return
+        }
+        author.book = book
 
         try {
             authorService.save(author)
@@ -60,6 +74,17 @@ class AuthorController {
             respond author.errors
             return
         }
+        def bookId = params.bookId
+        if (!bookId) {
+            render status: BAD_REQUEST
+            return
+        }
+        Book book = bookService.get(bookId)
+        if (!book) {
+            render status: NOT_FOUND
+            return
+        }
+        author.book = book
 
         try {
             authorService.save(author)

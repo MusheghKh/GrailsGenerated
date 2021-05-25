@@ -14,6 +14,7 @@ import grails.gorm.transactions.Transactional
 class BookController {
 
     BookService bookService
+    AuthorService authorService
 
     static responseFormats = ['json', 'xml']
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -73,10 +74,19 @@ class BookController {
 
     @Transactional
     def delete(Long id) {
-        if (id == null || bookService.delete(id) == null) {
+        if (id == null) {
             render status: NOT_FOUND
             return
         }
+        Book book = bookService.get(id)
+        if (book == null) {
+            render status: NOT_FOUND
+            return
+        }
+        book.authors.each {
+            authorService.delete(it.id)
+        }
+        bookService.delete(id)
 
         render status: NO_CONTENT
     }

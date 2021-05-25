@@ -45,13 +45,4 @@ class AuthorSpec extends Specification implements DomainUnitTest<Author> {
         then: 'name validation passes'
         domain.validate(['name'])
     }
-
-    void "test book can not be null"() {
-        when:
-        domain.book = null
-
-        then:
-        !domain.validate(['book'])
-        domain.errors['book'].code == 'nullable'
-    }
 }
