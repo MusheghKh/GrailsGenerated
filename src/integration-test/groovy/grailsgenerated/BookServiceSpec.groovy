@@ -14,24 +14,23 @@ class BookServiceSpec extends Specification {
     @Autowired Datastore datastore
 
     private static Long setupData() {
-        List<Author> authors = []
-        (1..5).each {
-            authors.add(new Author(name: "name$it"))
-        }
-
-        addAuthors(authors, new Book(name: "name1").save(flush: true, failOnError: true))
-        addAuthors(authors, new Book(name: "name2").save(flush: true, failOnError: true))
-        Book book = new Book(name: "name3").save(flush: true, failOnError: true)
-        addAuthors(authors, book)
-        addAuthors(authors, new Book(name: "name4").save(flush: true, failOnError: true))
-        addAuthors(authors, new Book(name: "name5").save(flush: true, failOnError: true))
+        addAuthors(new Book(name: "book1").save(flush: true, failOnError: true))
+        addAuthors(new Book(name: "book2").save(flush: true, failOnError: true))
+        Book book = addAuthors(new Book(name: "book3").save(flush: true, failOnError: true))
+        addAuthors(new Book(name: "book4").save(flush: true, failOnError: true))
+        addAuthors(new Book(name: "book5").save(flush: true, failOnError: true))
         book.id
     }
 
-    private static addAuthors(List<Author> authors, Book book) {
+    private static Book addAuthors(Book book) {
+        List<Author> authors = []
+        (1..5).each {
+            authors.add(new Author(name: "${book.name} author$it"))
+        }
         authors.each {
             book.addToAuthors(it)
         }
+        book
     }
 
 //    void cleanup() {
@@ -53,8 +52,8 @@ class BookServiceSpec extends Specification {
 
         then:
         bookList.size() == 2
-        bookList[0].name == 'name3'
-        bookList[1].name == 'name4'
+        bookList[0].name == 'book3'
+        bookList[1].name == 'book4'
     }
 
     void "test count"() {
@@ -67,8 +66,6 @@ class BookServiceSpec extends Specification {
     void "test delete"() {
         given:
         Long bookId = setupData()
-        Book book = bookService.get(bookId)
-        book.authors = null
 
         expect:
         bookService.count() == 5
