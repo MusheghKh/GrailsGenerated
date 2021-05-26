@@ -2,7 +2,6 @@ package grailsgenerated
 
 class Book {
 
-    Long id
     String name
 
     static hasMany = [authors: Author]

@@ -2,7 +2,6 @@ package grailsgenerated
 
 class Author {
 
-    Long id
     String name
 
     static belongsTo = [book: Book]
