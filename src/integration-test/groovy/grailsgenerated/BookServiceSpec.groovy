@@ -14,11 +14,11 @@ class BookServiceSpec extends Specification {
     @Autowired Datastore datastore
 
     private static Long setupData() {
-        addAuthors(new Book(name: "book1").save(flush: true, failOnError: true))
-        addAuthors(new Book(name: "book2").save(flush: true, failOnError: true))
-        Book book = addAuthors(new Book(name: "book3").save(flush: true, failOnError: true))
-        addAuthors(new Book(name: "book4").save(flush: true, failOnError: true))
-        addAuthors(new Book(name: "book5").save(flush: true, failOnError: true))
+        addAuthors(new Book(name: "book1"))
+        addAuthors(new Book(name: "book2"))
+        Book book = addAuthors(new Book(name: "book3"))
+        addAuthors(new Book(name: "book4"))
+        addAuthors(new Book(name: "book5"))
         book.id
     }
 
@@ -30,7 +30,7 @@ class BookServiceSpec extends Specification {
         authors.each {
             book.addToAuthors(it)
         }
-        book
+        book.save(flush: true, failOnError: true)
     }
 
 //    void cleanup() {
@@ -69,6 +69,7 @@ class BookServiceSpec extends Specification {
 
         expect:
         bookService.count() == 5
+        Author.count() == 25
 
         when:
         bookService.delete(bookId)
@@ -76,6 +77,7 @@ class BookServiceSpec extends Specification {
 
         then:
         bookService.count() == 4
+        Author.count() == 20
     }
 
     void "test save"() {
