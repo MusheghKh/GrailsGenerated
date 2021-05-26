@@ -10,4 +10,5 @@ class Author {
     static constraints = {
         name nullable: false, blank: false, maxSize: 100
     }
+
 }

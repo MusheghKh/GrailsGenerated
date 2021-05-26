@@ -14,19 +14,22 @@ class AuthorServiceSpec extends Specification {
     @Autowired Datastore datastore
 
     private Long setupData() {
-        // TODO: Populate valid domain instances and return a valid ID
-        //new Author(...).save(flush: true, failOnError: true)
-        //new Author(...).save(flush: true, failOnError: true)
-        //Author author = new Author(...).save(flush: true, failOnError: true)
-        //new Author(...).save(flush: true, failOnError: true)
-        //new Author(...).save(flush: true, failOnError: true)
-        assert false, "TODO: Provide a setupData() implementation for this generated test suite"
-        //author.id
+        Book book = new Book(name: "book1").save(flush: true, failOnError: true)
+        book.addToAuthors(new Author(name: "author1", book: book).save(flush: true, failOnError: true))
+        book.addToAuthors(new Author(name: "author2", book: book).save(flush: true, failOnError: true))
+
+        Author author = new Author(name: "author3", book: book).save(flush: true, failOnError: true)
+        book.addToAuthors(author)
+
+        book.addToAuthors(new Author(name: "author4", book: book).save(flush: true, failOnError: true))
+        book.addToAuthors(new Author(name: "author5", book: book).save(flush: true, failOnError: true))
+
+        author.id
     }
 
-    void cleanup() {
-        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
-    }
+//    void cleanup() {
+//        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
+//    }
 
     void "test get"() {
         setupData()
@@ -43,7 +46,8 @@ class AuthorServiceSpec extends Specification {
 
         then:
         authorList.size() == 2
-        assert false, "TODO: Verify the correct instances are returned"
+        authorList[0].name == "author3"
+        authorList[1].name == "author4"
     }
 
     void "test count"() {
@@ -55,11 +59,13 @@ class AuthorServiceSpec extends Specification {
 
     void "test delete"() {
         Long authorId = setupData()
+        Author author = authorService.get(authorId)
 
         expect:
         authorService.count() == 5
 
         when:
+        author.book.removeFromAuthors(author)
         authorService.delete(authorId)
         datastore.currentSession.flush()
 
@@ -68,9 +74,10 @@ class AuthorServiceSpec extends Specification {
     }
 
     void "test save"() {
+        Book book = new Book(name: "some book").save(flush: true, failOnError: true)
+
         when:
-        assert false, "TODO: Provide a valid instance to save"
-        Author author = new Author()
+        Author author = new Author(name: "some valid name", book: book)
         authorService.save(author)
 
         then:

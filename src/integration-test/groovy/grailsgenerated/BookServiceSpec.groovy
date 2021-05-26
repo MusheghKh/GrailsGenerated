@@ -13,7 +13,7 @@ class BookServiceSpec extends Specification {
     BookService bookService
     @Autowired Datastore datastore
 
-    private static Long setupData() {
+    private Long setupData() {
         addAuthors(new Book(name: "book1"))
         addAuthors(new Book(name: "book2"))
         Book book = addAuthors(new Book(name: "book3"))
@@ -64,7 +64,6 @@ class BookServiceSpec extends Specification {
     }
 
     void "test delete"() {
-        given:
         Long bookId = setupData()
 
         expect:
