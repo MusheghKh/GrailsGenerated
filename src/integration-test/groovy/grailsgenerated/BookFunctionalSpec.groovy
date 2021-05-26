@@ -49,8 +49,28 @@ class BookFunctionalSpec extends Specification {
         then:"The response is correct"
         response.status == HttpStatus.OK
         response.body() == []
-    }
 
+        when:"Save some instances and request index action"
+        HttpResponse<Map> response1 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, validJson), Map)
+        HttpResponse<Map> response2 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, validJson), Map)
+        response = client.toBlocking().exchange(HttpRequest.GET(resourcePath), Argument.of(List, Map))
+
+        then:"The response is correct"
+        response.status == HttpStatus.OK
+        response.body().size() == 2
+
+        cleanup:
+        def id = response1.body().id
+        def path = "${resourcePath}/${id}"
+        HttpResponse<Map> deleteResponse = client.toBlocking().exchange(HttpRequest.DELETE(path))
+        assert deleteResponse.status() == HttpStatus.NO_CONTENT
+
+        id = response2.body().id
+        path = "${resourcePath}/${id}"
+        deleteResponse = client.toBlocking().exchange(HttpRequest.DELETE(path))
+        assert deleteResponse.status() == HttpStatus.NO_CONTENT
+    }
+    
     @Rollback
     void "Test the save action correctly persists an instance"() {
         when:"The save action is executed with no content"
