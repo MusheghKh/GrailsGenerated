@@ -74,19 +74,10 @@ class BookController {
 
     @Transactional
     def delete(Long id) {
-        if (id == null) {
+        if (id == null || bookService.delete(id) == null) {
             render status: NOT_FOUND
             return
         }
-        Book book = bookService.get(id)
-        if (book == null) {
-            render status: NOT_FOUND
-            return
-        }
-        book.authors.each {
-            authorService.delete(it.id)
-        }
-        bookService.delete(id)
 
         render status: NO_CONTENT
     }

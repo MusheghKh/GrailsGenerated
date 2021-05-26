@@ -26,20 +26,20 @@ class BookFunctionalSpec extends Specification {
         this.client  = HttpClient.create(new URL(baseUrl))
     }
 
-    void cleanup() {
-        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
-    }
+//    void cleanup() {
+//        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
+//    }
 
     String getResourcePath() {
-        assert false, "TODO: provide the path to your resource. Example: \"${baseUrl}/books\""
+        "http://localhost:$serverPort/book"
     }
 
     Map getValidJson() {
-        assert false, "TODO: provide valid JSON"
+        [name: "some valid name"]
     }
 
     Map getInvalidJson() {
-        assert false, "TODO: provide invalid JSON"
+        [name: null]
     }
 
     void "Test the index action"() {
