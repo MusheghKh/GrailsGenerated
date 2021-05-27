@@ -9,10 +9,13 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.HttpClient
 import io.micronaut.http.client.exceptions.HttpClientResponseException
+import org.grails.datastore.mapping.core.Datastore
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 
+@Rollback
 @Integration
 class AuthorFunctionalSpec extends Specification {
 
@@ -20,26 +23,30 @@ class AuthorFunctionalSpec extends Specification {
     @AutoCleanup
     HttpClient client
 
+    @Autowired Datastore datastore
+
+    BookService bookService
+
     @OnceBefore
     void init() {
         String baseUrl = "http://localhost:$serverPort"
         this.client  = HttpClient.create(new URL(baseUrl))
     }
 
-    void cleanup() {
-        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
-    }
+//    void cleanup() {
+//        assert false, "TODO: Provide a cleanup implementation if using MongoDB"
+//    }
 
     String getResourcePath() {
-        assert false, "TODO: provide the path to your resource. Example: \"${baseUrl}/books\""
+        "/author"
     }
 
-    Map getValidJson() {
-        assert false, "TODO: provide valid JSON"
+    Map getValidJson(Long bookId) {
+        [name: "some valid name", book: bookId]
     }
 
     Map getInvalidJson() {
-        assert false, "TODO: provide invalid JSON"
+        [name: ""]
     }
 
     void "Test the index action"() {
@@ -51,8 +58,11 @@ class AuthorFunctionalSpec extends Specification {
         response.body() == []
     }
 
-    @Rollback
+//    @Rollback
     void "Test the save action correctly persists an instance"() {
+//        given:
+        Long bookId = saveBook()
+
         when:"The save action is executed with no content"
         client.toBlocking().exchange(HttpRequest.POST(resourcePath, ""))
 
@@ -68,7 +78,7 @@ class AuthorFunctionalSpec extends Specification {
         e.response.status == HttpStatus.UNPROCESSABLE_ENTITY
 
         when:"The save action is executed with valid data"
-        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, validJson), Map)
+        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
 
         then:"The response is correct"
         response.status == HttpStatus.CREATED
@@ -80,11 +90,16 @@ class AuthorFunctionalSpec extends Specification {
         def path = "${resourcePath}/${id}"
         response = client.toBlocking().exchange(HttpRequest.DELETE(path))
         assert response.status() == HttpStatus.NO_CONTENT
+
+//        deleteBook(bookId)
     }
 
     void "Test the update action correctly updates an instance"() {
+//        given:
+        Long bookId = saveBook()
+
         when:"The save action is executed with valid data"
-        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, validJson), Map)
+        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
 
         then:"The response is correct"
         response.status == HttpStatus.CREATED
@@ -100,7 +115,7 @@ class AuthorFunctionalSpec extends Specification {
         e.response.status == HttpStatus.UNPROCESSABLE_ENTITY
 
         when: "The update action is called with valid data"
-        response = client.toBlocking().exchange(HttpRequest.PUT(path, validJson), Map)
+        response = client.toBlocking().exchange(HttpRequest.PUT(path, getValidJson(bookId)), Map)
 
         then:"The response is correct"
         response.status == HttpStatus.OK
@@ -109,11 +124,15 @@ class AuthorFunctionalSpec extends Specification {
         cleanup:
         response = client.toBlocking().exchange(HttpRequest.DELETE(path))
         assert response.status() == HttpStatus.NO_CONTENT
+//        deleteBook(bookId)
     }
 
     void "Test the show action correctly renders an instance"() {
+//        given:
+        Long bookId = saveBook()
+
         when:"The save action is executed with valid data"
-        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, validJson), Map)
+        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
 
         then:"The response is correct"
         response.status == HttpStatus.CREATED
@@ -130,12 +149,16 @@ class AuthorFunctionalSpec extends Specification {
 
         cleanup:
         client.toBlocking().exchange(HttpRequest.DELETE(path))
+//        deleteBook(bookId)
     }
 
-    @Rollback
+//    @Rollback
     void "Test the delete action correctly deletes an instance"() {
+        given:
+        Long bookId = saveBook()
+
         when:"The save action is executed with valid data"
-        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, validJson), Map)
+        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
 
         then:"The response is correct"
         response.status == HttpStatus.CREATED
@@ -156,6 +179,23 @@ class AuthorFunctionalSpec extends Specification {
 
         then:"The response is correct"
         response.status == HttpStatus.NO_CONTENT
+        datastore.currentSession.flush()
         !Author.get(id)
+
+//        cleanup:
+//        deleteBook(bookId)
+    }
+
+    private Long saveBook() {
+        Book.withNewTransaction {
+            return bookService.save(new Book(name: "some valid book name")).id
+        }
+    }
+
+    private void deleteBook(Long bookId) {
+        Book.withNewTransaction {
+            datastore.currentSession.flush()
+            bookService.delete(bookId)
+        }
     }
 }

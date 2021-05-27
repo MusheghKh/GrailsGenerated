@@ -41,17 +41,6 @@ class AuthorController {
             respond author.errors
             return
         }
-        def bookId = params.bookId
-        if (!bookId) {
-            render status: BAD_REQUEST
-            return
-        }
-        Book book = bookService.get(bookId)
-        if (!book) {
-            render status: NOT_FOUND
-            return
-        }
-        author.book = book
 
         try {
             authorService.save(author)
@@ -74,17 +63,6 @@ class AuthorController {
             respond author.errors
             return
         }
-        def bookId = params.bookId
-        if (!bookId) {
-            render status: BAD_REQUEST
-            return
-        }
-        Book book = bookService.get(bookId)
-        if (!book) {
-            render status: NOT_FOUND
-            return
-        }
-        author.book = book
 
         try {
             authorService.save(author)
