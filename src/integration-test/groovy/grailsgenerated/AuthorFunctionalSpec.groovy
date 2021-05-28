@@ -15,7 +15,6 @@ import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
 
-@Rollback
 @Integration
 class AuthorFunctionalSpec extends Specification {
 
@@ -24,8 +23,6 @@ class AuthorFunctionalSpec extends Specification {
     HttpClient client
 
     @Autowired Datastore datastore
-
-    BookService bookService
 
     @OnceBefore
     void init() {
@@ -41,6 +38,12 @@ class AuthorFunctionalSpec extends Specification {
         "/author"
     }
 
+    String getBookResourcePath() {
+        "/book"
+    }
+
+    String get
+
     Map getValidJson(Long bookId) {
         [name: "some valid name", book: bookId]
     }
@@ -50,18 +53,41 @@ class AuthorFunctionalSpec extends Specification {
     }
 
     void "Test the index action"() {
+        Long bookId = requestSaveBook()
+
         when:"The index action is requested"
         HttpResponse<List<Map>> response = client.toBlocking().exchange(HttpRequest.GET(resourcePath), Argument.of(List, Map))
 
         then:"The response is correct"
         response.status == HttpStatus.OK
         response.body() == []
+
+        when:"Save some instances and request index action"
+        HttpResponse<Map> response1 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
+        HttpResponse<Map> response2 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
+        response = client.toBlocking().exchange(HttpRequest.GET(resourcePath), Argument.of(List, Map))
+
+        then:"The response is correct"
+        response.status == HttpStatus.OK
+        response.body().size() == 2
+
+        cleanup:
+        def id = response1.body().id
+        def path = "${resourcePath}/${id}"
+        HttpResponse<Map> deleteResponse = client.toBlocking().exchange(HttpRequest.DELETE(path))
+        assert deleteResponse.status() == HttpStatus.NO_CONTENT
+
+        id = response2.body().id
+        path = "${resourcePath}/${id}"
+        deleteResponse = client.toBlocking().exchange(HttpRequest.DELETE(path))
+        assert deleteResponse.status() == HttpStatus.NO_CONTENT
+
+        requestDeleteBook(bookId)
     }
 
-//    @Rollback
+    @Rollback
     void "Test the save action correctly persists an instance"() {
-//        given:
-        Long bookId = saveBook()
+        Long bookId = requestSaveBook()
 
         when:"The save action is executed with no content"
         client.toBlocking().exchange(HttpRequest.POST(resourcePath, ""))
@@ -91,12 +117,11 @@ class AuthorFunctionalSpec extends Specification {
         response = client.toBlocking().exchange(HttpRequest.DELETE(path))
         assert response.status() == HttpStatus.NO_CONTENT
 
-//        deleteBook(bookId)
+        requestDeleteBook(bookId)
     }
 
     void "Test the update action correctly updates an instance"() {
-//        given:
-        Long bookId = saveBook()
+        Long bookId = requestSaveBook()
 
         when:"The save action is executed with valid data"
         HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
@@ -124,12 +149,11 @@ class AuthorFunctionalSpec extends Specification {
         cleanup:
         response = client.toBlocking().exchange(HttpRequest.DELETE(path))
         assert response.status() == HttpStatus.NO_CONTENT
-//        deleteBook(bookId)
+        requestDeleteBook(bookId)
     }
 
     void "Test the show action correctly renders an instance"() {
-//        given:
-        Long bookId = saveBook()
+        Long bookId = requestSaveBook()
 
         when:"The save action is executed with valid data"
         HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
@@ -149,13 +173,12 @@ class AuthorFunctionalSpec extends Specification {
 
         cleanup:
         client.toBlocking().exchange(HttpRequest.DELETE(path))
-//        deleteBook(bookId)
+        requestDeleteBook(bookId)
     }
 
-//    @Rollback
+    @Rollback
     void "Test the delete action correctly deletes an instance"() {
-        given:
-        Long bookId = saveBook()
+        Long bookId = requestSaveBook()
 
         when:"The save action is executed with valid data"
         HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
@@ -182,20 +205,16 @@ class AuthorFunctionalSpec extends Specification {
         datastore.currentSession.flush()
         !Author.get(id)
 
-//        cleanup:
-//        deleteBook(bookId)
+        cleanup:
+        requestDeleteBook(bookId)
     }
 
-    private Long saveBook() {
-        Book.withNewTransaction {
-            return bookService.save(new Book(name: "some valid book name")).id
-        }
+    private Long requestSaveBook() {
+        HttpResponse<Map> response = client.toBlocking().exchange(HttpRequest.POST("/book", [name: "book name"]), Map)
+        response.body().id
     }
 
-    private void deleteBook(Long bookId) {
-        Book.withNewTransaction {
-            datastore.currentSession.flush()
-            bookService.delete(bookId)
-        }
+    private void requestDeleteBook(Long bookId) {
+        client.toBlocking().exchange(HttpRequest.DELETE("${bookResourcePath}/${bookId}"))
     }
 }
