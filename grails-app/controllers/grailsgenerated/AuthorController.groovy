@@ -1,6 +1,7 @@
 package grailsgenerated
 
 import grails.validation.ValidationException
+import grailsgenerated.controller.ControllerExtensions
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST
 import static org.springframework.http.HttpStatus.CREATED
@@ -13,10 +14,9 @@ import grails.gorm.transactions.ReadOnly
 import grails.gorm.transactions.Transactional
 
 @ReadOnly
-class AuthorController {
+class AuthorController implements ControllerExtensions{
 
     AuthorService authorService
-    BookService bookService
 
     static responseFormats = ['json', 'xml']
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -33,7 +33,7 @@ class AuthorController {
     @Transactional
     def save(Author author) {
         if (author == null) {
-            render status: NOT_FOUND
+            respondError NOT_FOUND
             return
         }
         if (author.hasErrors()) {
@@ -55,7 +55,7 @@ class AuthorController {
     @Transactional
     def update(Author author) {
         if (author == null) {
-            render status: NOT_FOUND
+            respondError NOT_FOUND
             return
         }
         if (author.hasErrors()) {
@@ -77,7 +77,7 @@ class AuthorController {
     @Transactional
     def delete(Long id) {
         if (id == null || authorService.delete(id) == null) {
-            render status: NOT_FOUND
+            respondError NOT_FOUND, "author with id $id not found"
             return
         }
 
