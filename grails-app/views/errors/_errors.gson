@@ -12,31 +12,18 @@ response.status UNPROCESSABLE_ENTITY
 json {
     Errors errorsObject = (Errors)this.errors
     def allErrors = errorsObject.allErrors
-    int errorCount = allErrors.size()
-    def resourcePath = g.link(resource:request.uri, absolute:false)
-    def resourceLink = g.link(resource:request.uri, absolute:true)
-    if(errorCount == 1) {
-        def error = allErrors.iterator().next()
-        message messageSource.getMessage(error, locale)
-        path resourcePath
-        _links {
-            self {
-                href resourceLink
-            }
+//    def resourcePath = g.link(resource:request.uri, absolute:false)
+//    def resourceLink = g.link(resource:request.uri, absolute:true)
+
+    StringBuilder messageBuilder = new StringBuilder()
+
+    allErrors.each {
+        if (messageBuilder.length() != 0) {
+            messageBuilder.append(", ")
         }
+        messageBuilder.append(messageSource.getMessage(it, locale))
     }
-    else {
-        total errorCount
-        _embedded {
-            errors(allErrors) { ObjectError error ->
-                message messageSource.getMessage(error, locale)
-                path resourcePath
-                _links {
-                    self {
-                        href resourceLink
-                    }
-                }
-            }
-        }
-    }
+
+    error UNPROCESSABLE_ENTITY.value()
+    message messageBuilder.toString()
 }
