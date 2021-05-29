@@ -2,6 +2,7 @@ package grailsgenerated
 
 import grails.validation.ValidationException
 import grailsgenerated.controller.ControllerExtensions
+import org.springframework.web.servlet.support.RequestContextUtils
 
 import static org.springframework.http.HttpStatus.CREATED
 import static org.springframework.http.HttpStatus.NOT_FOUND
@@ -16,6 +17,7 @@ import grails.gorm.transactions.Transactional
 class BookController implements ControllerExtensions{
 
     BookService bookService
+    def messageSource
 
     static responseFormats = ['json', 'xml']
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -76,7 +78,8 @@ class BookController implements ControllerExtensions{
     @Transactional
     def delete(Long id) {
         if (id == null || bookService.delete(id) == null) {
-            respondError NOT_FOUND, "book with id $id not found"
+            String message = messageSource.getMessage("default.not.found.message", ["Book", id] as Object[], RequestContextUtils.getLocale(request))
+            respondError NOT_FOUND, message
             return
         }
 

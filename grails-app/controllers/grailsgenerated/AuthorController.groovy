@@ -2,6 +2,7 @@ package grailsgenerated
 
 import grails.validation.ValidationException
 import grailsgenerated.controller.ControllerExtensions
+import org.springframework.web.servlet.support.RequestContextUtils
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST
 import static org.springframework.http.HttpStatus.CREATED
@@ -17,6 +18,7 @@ import grails.gorm.transactions.Transactional
 class AuthorController implements ControllerExtensions{
 
     AuthorService authorService
+    def messageSource
 
     static responseFormats = ['json', 'xml']
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -77,7 +79,8 @@ class AuthorController implements ControllerExtensions{
     @Transactional
     def delete(Long id) {
         if (id == null || authorService.delete(id) == null) {
-            respondError NOT_FOUND, "author with id $id not found"
+            String message = messageSource.getMessage("default.not.found.message", ["Author", id] as Object[], RequestContextUtils.getLocale(request))
+            respondError NOT_FOUND, message
             return
         }
 
