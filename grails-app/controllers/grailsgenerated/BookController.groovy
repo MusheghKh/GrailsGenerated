@@ -54,11 +54,14 @@ class BookController implements ControllerExtensions{
     }
 
     @Transactional
-    def update(Book book) {
+    def update(Long id) {
+        Book book = bookService.get(id)
         if (book == null) {
-            respondError NOT_FOUND
+            String message = messageSource.getMessage("default.not.found.message", ["Book", id] as Object[], RequestContextUtils.getLocale(request))
+            respondError NOT_FOUND, message
             return
         }
+        book.properties = request.JSON
         if (book.hasErrors()) {
             transactionStatus.setRollbackOnly()
             respond book.errors

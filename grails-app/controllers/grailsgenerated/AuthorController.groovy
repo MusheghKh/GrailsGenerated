@@ -55,11 +55,13 @@ class AuthorController implements ControllerExtensions{
     }
 
     @Transactional
-    def update(Author author) {
+    def update(Long id) {
+        Author author = authorService.get(id)
         if (author == null) {
             respondError NOT_FOUND
             return
         }
+        author.properties = request.JSON
         if (author.hasErrors()) {
             transactionStatus.setRollbackOnly()
             respond author.errors
