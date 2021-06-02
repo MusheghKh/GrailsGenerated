@@ -1,6 +1,7 @@
-package grailsgenerated
+package grailsgenerated.domain
 
 import grails.testing.gorm.DomainUnitTest
+import grailsgenerated.Author
 import spock.lang.Specification
 
 class AuthorSpec extends Specification implements DomainUnitTest<Author> {

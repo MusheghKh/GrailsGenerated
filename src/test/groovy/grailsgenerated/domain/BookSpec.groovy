@@ -1,6 +1,7 @@
-package grailsgenerated
+package grailsgenerated.domain
 
 import grails.testing.gorm.DomainUnitTest
+import grailsgenerated.Book
 import spock.lang.Specification
 
 class BookSpec extends Specification implements DomainUnitTest<Book> {

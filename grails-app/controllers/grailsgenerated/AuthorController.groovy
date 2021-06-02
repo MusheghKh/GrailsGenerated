@@ -4,12 +4,10 @@ import grails.validation.ValidationException
 import grailsgenerated.controller.ControllerExtensions
 import org.springframework.web.servlet.support.RequestContextUtils
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST
 import static org.springframework.http.HttpStatus.CREATED
 import static org.springframework.http.HttpStatus.NOT_FOUND
 import static org.springframework.http.HttpStatus.NO_CONTENT
 import static org.springframework.http.HttpStatus.OK
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 
 import grails.gorm.transactions.ReadOnly
 import grails.gorm.transactions.Transactional
@@ -25,11 +23,16 @@ class AuthorController implements ControllerExtensions{
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond authorService.list(params), model:[authorCount: authorService.count()]
+        respond authorService.list(params)
     }
 
     def show(Long id) {
         respond authorService.get(id)
+    }
+
+    def listByBookId(Long bookId, Integer max) {
+        params.max = Math.min(max ?: 10, 100)
+        respond authorService.listByBookId(bookId, params)
     }
 
     @Transactional

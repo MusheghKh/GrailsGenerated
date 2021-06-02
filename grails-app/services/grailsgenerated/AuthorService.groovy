@@ -1,18 +1,34 @@
 package grailsgenerated
 
-import grails.gorm.services.Service
+import grails.gorm.transactions.Transactional
 
-@Service(Author)
-interface AuthorService {
+@Transactional
+class AuthorService {
 
-    Author get(Serializable id)
+    Author get(Serializable id) {
+        Author.get(id)
+    }
 
-    List<Author> list(Map args)
+    List<Author> list(Map params) {
+        Author.list(params)
+    }
 
-    Long count()
+    List<Author> listByBookId(Serializable bookId, Map params) {
+        Author.findAllByBook(Book.get(bookId), params)
+    }
 
-    Author delete(Serializable id)
+    Long count() {
+        Author.count()
+    }
 
-    Author save(Author author)
+    Author delete(Serializable id) {
+        Author author = get(id)
+        author.book.authors.remove(author)
+        author.delete(flush: true)
+        author
+    }
 
+    Author save(Author author) {
+        author.save()
+    }
 }

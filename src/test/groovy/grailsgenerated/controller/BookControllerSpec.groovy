@@ -1,4 +1,7 @@
-package grailsgenerated
+package grailsgenerated.controller
+
+import grailsgenerated.Book
+import grailsgenerated.BookController
 
 import spock.lang.*
 import static org.springframework.http.HttpStatus.OK
@@ -25,7 +28,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the index action returns the correct response"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * list(_) >> []
             1 * count() >> 0
         }
@@ -50,7 +53,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the save action correctly persists"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * save(_ as Book)
         }
 
@@ -69,7 +72,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the save action with an invalid instance"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * save(_ as Book) >> { Book book ->
                 throw new ValidationException("Invalid instance", book.errors)
             }
@@ -89,7 +92,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the show action with a null id"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * get(null) >> null
         }
 
@@ -102,7 +105,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the show action with a valid id"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * get(2) >> new Book()
         }
 
@@ -127,7 +130,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the update action correctly persists"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * save(_ as Book)
         }
 
@@ -148,7 +151,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the update action with an invalid instance"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * save(_ as Book) >> { Book book ->
                 throw new ValidationException("Invalid instance", book.errors)
             }
@@ -179,7 +182,7 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
 
     void "Test the delete action with an instance"() {
         given:
-        controller.bookService = Mock(BookService) {
+        controller.bookService = Mock(BookServiceOld) {
             1 * delete(2) >> new Book(id: 2)
         }
 

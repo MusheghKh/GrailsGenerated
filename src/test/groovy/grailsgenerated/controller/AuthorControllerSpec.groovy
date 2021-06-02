@@ -1,5 +1,7 @@
-package grailsgenerated
+package grailsgenerated.controller
 
+import grailsgenerated.Author
+import grailsgenerated.AuthorController
 import spock.lang.*
 import static org.springframework.http.HttpStatus.OK
 import static org.springframework.http.HttpStatus.NOT_FOUND
@@ -27,7 +29,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the index action returns the correct response"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * list(_) >> []
             1 * count() >> 0
         }
@@ -52,7 +54,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the save action correctly persists"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * save(_ as Author)
         }
 
@@ -71,7 +73,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the save action with an invalid instance"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * save(_ as Author) >> { Author author ->
                 throw new ValidationException("Invalid instance", author.errors)
             }
@@ -91,7 +93,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the show action with a null id"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * get(null) >> null
         }
 
@@ -104,7 +106,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the show action with a valid id"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * get(2) >> new Author()
         }
 
@@ -129,7 +131,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the update action correctly persists"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * save(_ as Author)
         }
 
@@ -150,7 +152,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the update action with an invalid instance"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * save(_ as Author) >> { Author author ->
                 throw new ValidationException("Invalid instance", author.errors)
             }
@@ -181,7 +183,7 @@ class AuthorControllerSpec extends Specification implements ControllerUnitTest<A
 
     void "Test the delete action with an instance"() {
         given:
-        controller.authorService = Mock(AuthorService) {
+        controller.authorService = Mock(AuthorServiceOld) {
             1 * delete(2) >> new Author(id: 2)
         }
 

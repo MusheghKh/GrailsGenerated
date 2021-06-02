@@ -1,18 +1,29 @@
 package grailsgenerated
 
-import grails.gorm.services.Service
+import grails.gorm.transactions.Transactional
 
-@Service(Book)
-interface BookService {
+@Transactional
+class BookService {
 
-    Book get(Serializable id)
+    Book get(Serializable id) {
+        Book.get(id)
+    }
 
-    List<Book> list(Map args)
+    List<Book> list(Map params) {
+        Book.list(params)
+    }
 
-    Long count()
+    Long count() {
+        Book.count()
+    }
 
-    Book delete(Serializable id)
+    Book delete(Serializable id) {
+        Book book = Book.get(id)
+        book.delete(flush: true)
+        book
+    }
 
-    Book save(Book book)
-
+    Book save(Book book) {
+        book.save()
+    }
 }
