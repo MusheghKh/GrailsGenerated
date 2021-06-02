@@ -23,6 +23,9 @@ class AuthorService {
 
     Author delete(Serializable id) {
         Author author = get(id)
+        if (author == null) {
+            return null
+        }
         author.book.authors.remove(author)
         author.delete(flush: true)
         author

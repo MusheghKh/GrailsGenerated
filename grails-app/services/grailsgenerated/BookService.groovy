@@ -19,6 +19,9 @@ class BookService {
 
     Book delete(Serializable id) {
         Book book = Book.get(id)
+        if (book == null) {
+            return null
+        }
         book.delete(flush: true)
         book
     }
