@@ -39,8 +39,6 @@ class AuthorFunctionalSpec extends Specification {
         "/book"
     }
 
-    String get
-
     Map getValidJson(Long bookId) {
         [name: "some valid name", book: bookId]
     }
