@@ -2,6 +2,7 @@ package grailsgenerated
 
 import grails.validation.ValidationException
 import grailsgenerated.controller.ControllerExtensions
+import grailsgenerated.exceptions.BookNotFoundException
 import org.springframework.web.servlet.support.RequestContextUtils
 
 import static org.springframework.http.HttpStatus.CREATED
@@ -26,13 +27,18 @@ class AuthorController implements ControllerExtensions{
         respond authorService.list(params)
     }
 
-    def show(Long id) {
-        respond authorService.get(id)
-    }
-
     def listByBookId(Long bookId, Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond authorService.listByBookId(bookId, params)
+        try {
+            respond authorService.listByBookId(bookId, params)
+        } catch(BookNotFoundException e) {
+            String message = messageSource.getMessage("default.not.found.message", ["Book", bookId] as Object[], RequestContextUtils.getLocale(request))
+            respondError NOT_FOUND, message
+        }
+    }
+
+    def show(Long id) {
+        respond authorService.get(id)
     }
 
     @Transactional

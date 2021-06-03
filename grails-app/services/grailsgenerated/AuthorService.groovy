@@ -1,6 +1,7 @@
 package grailsgenerated
 
 import grails.gorm.transactions.Transactional
+import grailsgenerated.exceptions.BookNotFoundException
 
 @Transactional
 class AuthorService {
@@ -13,8 +14,12 @@ class AuthorService {
         Author.list(params)
     }
 
-    List<Author> listByBookId(Serializable bookId, Map params) {
-        Author.findAllByBook(Book.get(bookId), params)
+    List<Author> listByBookId(Serializable bookId, Map params) throws BookNotFoundException{
+        Book book = Book.get(bookId)
+        if (book == null) {
+            throw new BookNotFoundException()
+        }
+        Author.findAllByBook(book, params)
     }
 
     Long count() {
