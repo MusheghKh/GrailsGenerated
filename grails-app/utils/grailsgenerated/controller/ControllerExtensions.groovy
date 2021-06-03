@@ -10,8 +10,7 @@ trait ControllerExtensions {
             message = httpStatus.name()
         }
         ErrorDto errorDto = new ErrorDto(httpStatus.value(), message)
-        response.status = httpStatus.value()
-        respond errorDto
+        respond errorDto, [status: httpStatus]
     }
 
 }
