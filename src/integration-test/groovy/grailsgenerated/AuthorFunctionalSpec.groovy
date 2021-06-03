@@ -86,14 +86,18 @@ class AuthorFunctionalSpec extends Specification {
         Long bookId = requestSaveBook()
 
         when:"The listByBookId action is requested with wrong bookID"
-        HttpResponse<List<Map>> response = client.toBlocking().exchange(HttpRequest.GET("${resourcePath}/ofBook/9999"), Argument.of(List, Map))
+        client.toBlocking().exchange(HttpRequest.GET("${resourcePath}/ofBook/9999"), Argument.of(List, Map), Argument.of(Map))
 
         then:"The response is not found"
         HttpClientException exception = thrown(HttpClientException)
         exception.response.status == HttpStatus.NOT_FOUND
+        Optional<Map> body = exception.response.getBody(Map)
+        body.isPresent()
+        body.get()["error"] == 404
+        body.get()["message"] == "Book not found with id 9,999"
 
         when:"The listByBookId action is requested"
-        response = client.toBlocking().exchange(HttpRequest.GET("${resourcePath}/ofBook/$bookId"), Argument.of(List, Map))
+        HttpResponse<List<Map>> response = client.toBlocking().exchange(HttpRequest.GET("${resourcePath}/ofBook/$bookId"), Argument.of(List, Map))
 
         then:"The response is correct"
         response.status == HttpStatus.OK
