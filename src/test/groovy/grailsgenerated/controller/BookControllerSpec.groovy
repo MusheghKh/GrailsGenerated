@@ -26,6 +26,10 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
         params["name"] = 'someValidName'
     }
 
+    def setupMessageSource() {
+        messageSource.addMessage("default.not.found.message", request.locale, "{0} not found with id {1}")
+    }
+
     void "Test the index action returns the correct response"() {
         given:
         controller.bookService = Mock(BookService) {
@@ -119,6 +123,8 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
     }
 
     void "Test the update action with a null instance"() {
+        setupMessageSource()
+
         when:
         request.contentType = JSON_CONTENT_TYPE
         request.method = 'PUT'
@@ -171,6 +177,8 @@ class BookControllerSpec extends Specification implements ControllerUnitTest<Boo
     }
 
     void "Test the delete action with a null instance"() {
+        setupMessageSource()
+
         when:
         request.contentType = JSON_CONTENT_TYPE
         request.method = 'DELETE'
