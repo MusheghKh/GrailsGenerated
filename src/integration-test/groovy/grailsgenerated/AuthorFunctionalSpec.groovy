@@ -8,6 +8,7 @@ import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.HttpClient
+import io.micronaut.http.client.exceptions.HttpClientException
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import org.grails.datastore.mapping.core.Datastore
 import org.springframework.beans.factory.annotation.Autowired
@@ -66,6 +67,46 @@ class AuthorFunctionalSpec extends Specification {
         HttpResponse<Map> response1 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
         HttpResponse<Map> response2 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
         response = client.toBlocking().exchange(HttpRequest.GET(resourcePath), Argument.of(List, Map))
+
+        then:"The response is correct"
+        response.status == HttpStatus.OK
+        response.body().size() == 2
+
+        cleanup:
+        def id = response1.body().id
+        def path = "${resourcePath}/${id}"
+        HttpResponse<Map> deleteResponse = client.toBlocking().exchange(HttpRequest.DELETE(path))
+        assert deleteResponse.status() == HttpStatus.NO_CONTENT
+
+        id = response2.body().id
+        path = "${resourcePath}/${id}"
+        deleteResponse = client.toBlocking().exchange(HttpRequest.DELETE(path))
+        assert deleteResponse.status() == HttpStatus.NO_CONTENT
+
+        requestDeleteBook(bookId)
+    }
+
+    void "test the listByBookId action"() {
+        Long bookId = requestSaveBook()
+
+        when:"The listByBookId action is requested with wrong bookID"
+        HttpResponse<List<Map>> response = client.toBlocking().exchange(HttpRequest.GET("${resourcePath}/ofBook/9999"), Argument.of(List, Map))
+
+        then:"The response is not found"
+        HttpClientException exception = thrown(HttpClientException)
+        exception.response.status == HttpStatus.NOT_FOUND
+
+        when:"The listByBookId action is requested"
+        response = client.toBlocking().exchange(HttpRequest.GET("${resourcePath}/ofBook/$bookId"), Argument.of(List, Map))
+
+        then:"The response is correct"
+        response.status == HttpStatus.OK
+        response.body() == []
+
+        when:"Save some instances and request listByBookId action"
+        HttpResponse<Map> response1 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
+        HttpResponse<Map> response2 = client.toBlocking().exchange(HttpRequest.POST(resourcePath, getValidJson(bookId)), Map)
+        response = client.toBlocking().exchange(HttpRequest.GET("${resourcePath}/ofBook/$bookId"), Argument.of(List, Map))
 
         then:"The response is correct"
         response.status == HttpStatus.OK
