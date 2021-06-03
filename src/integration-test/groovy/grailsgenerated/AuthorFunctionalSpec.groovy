@@ -10,8 +10,6 @@ import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.HttpClient
 import io.micronaut.http.client.exceptions.HttpClientException
 import io.micronaut.http.client.exceptions.HttpClientResponseException
-import org.grails.datastore.mapping.core.Datastore
-import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -22,8 +20,6 @@ class AuthorFunctionalSpec extends Specification {
     @Shared
     @AutoCleanup
     HttpClient client
-
-    @Autowired Datastore datastore
 
     @OnceBefore
     void init() {
@@ -243,7 +239,6 @@ class AuthorFunctionalSpec extends Specification {
 
         then:"The response is correct"
         response.status == HttpStatus.NO_CONTENT
-        datastore.currentSession.flush()
         !Author.get(id)
 
         cleanup:
