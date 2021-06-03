@@ -1,5 +1,6 @@
 package grailsgenerated.controller
 
+import dto.ErrorDto
 import org.springframework.http.HttpStatus
 
 trait ControllerExtensions {
@@ -8,9 +9,9 @@ trait ControllerExtensions {
         if (message == null) {
             message = httpStatus.name()
         }
-        Map model = [error: httpStatus.value(), message: message]
+        ErrorDto errorDto = new ErrorDto(httpStatus.value(), message)
         response.status = httpStatus.value()
-        respond model
+        respond errorDto
     }
 
 }
